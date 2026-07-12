@@ -70,7 +70,7 @@ model, scaler, feature_names = load_model()
 # ── Header ────────────────────────────────────────────────────
 st.markdown('<div class="title">⚙️ Machine Failure Predictor</div>',
             unsafe_allow_html=True)
-st.markdown('<div class="subtitle">IIT Guwahati — Capstone Project | Predictive Maintenance</div>',
+st.markdown('<div class="subtitle"> Predictive Maintenance</div>',
             unsafe_allow_html=True)
 st.markdown('---')
 
