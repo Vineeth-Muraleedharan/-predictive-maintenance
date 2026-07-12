@@ -1,0 +1,5 @@
+__pycache__/
+.ipynb_checkpoints/
+keras_tuner_dir/
+*.png
+app_v2.py
