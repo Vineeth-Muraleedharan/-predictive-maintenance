@@ -76,42 +76,9 @@ model, scaler, feature_names = load_model()
 st.markdown('<div class="title">⚙️ Machine Failure Predictor</div>',
             unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">IIT Guwahati — Capstone Project | Predictive Maintenance</div>',
+    '<div class="subtitle"> Predictive Maintenance</div>',
     unsafe_allow_html=True)
 st.markdown('---')
-
-
-# ── Quick test scenarios ──────────────────────────────────────
-st.markdown('**Quick Test Scenarios:**')
-col1, col2 = st.columns(2)
-
-with col1:
-    failure_btn = st.button('⚠️ Load Failure Scenario', use_container_width=True)
-with col2:
-    normal_btn  = st.button('✅ Load Normal Scenario',  use_container_width=True)
-
-# Set defaults based on scenario
-if failure_btn:
-    default_type      = 2       # H — Heavy Duty
-    default_air       = 302.0
-    default_proc      = 312.0
-    default_rot       = 2800
-    default_torque    = 70.0
-    default_tool_wear = 240
-elif normal_btn:
-    default_type      = 0       # L — Light Duty
-    default_air       = 298.0
-    default_proc      = 308.0
-    default_rot       = 1500
-    default_torque    = 35.0
-    default_tool_wear = 50
-else:
-    default_type      = 1       # M — Medium Duty
-    default_air       = 298.0
-    default_proc      = 308.0
-    default_rot       = 1550
-    default_torque    = 45.0
-    default_tool_wear = 150
 
 
 # ── Input ─────────────────────────────────────────────────────
@@ -120,47 +87,45 @@ st.subheader('Enter Sensor Readings')
 c1, c2 = st.columns(2)
 
 with c1:
-    type_options = ['L — Light Duty', 'M — Medium Duty', 'H — Heavy Duty']
     machine_type = st.selectbox(
         'Machine Type',
-        type_options,
-        index=default_type
+        ['L - Light Duty', 'M - Medium Duty', 'H - Heavy Duty']
     )
     type_val = {
-        'L — Light Duty':  0,
-        'M — Medium Duty': 1,
-        'H — Heavy Duty':  2
+        'L - Light Duty':  0,
+        'M - Medium Duty': 1,
+        'H - Heavy Duty':  2
     }[machine_type]
 
     air_temp = st.number_input(
         'Air Temperature (K)',
         min_value=295.0, max_value=305.0,
-        value=float(default_air), step=0.1
+        value=298.0, step=0.1
     )
 
     proc_temp = st.number_input(
         'Process Temperature (K)',
         min_value=305.0, max_value=315.0,
-        value=float(default_proc), step=0.1
+        value=308.0, step=0.1
     )
 
 with c2:
     rot_speed = st.number_input(
         'Rotational Speed (rpm)',
         min_value=1168, max_value=2886,
-        value=int(default_rot), step=10
+        value=1550, step=10
     )
 
     torque = st.number_input(
         'Torque (Nm)',
         min_value=3.8, max_value=76.6,
-        value=float(default_torque), step=0.1
+        value=45.0, step=0.1
     )
 
     tool_wear = st.number_input(
         'Tool Wear (min)',
         min_value=0, max_value=253,
-        value=int(default_tool_wear), step=1
+        value=150, step=1
     )
 
 st.markdown('---')
@@ -186,11 +151,10 @@ if predict_btn:
         'Wear_Torque':             wear_torque
     }
 
-    # Predict — use 0.3 threshold for early warning
+    # Predict — 0.3 threshold for early warning
     df_input = pd.DataFrame([input_dict])[feature_names]
     scaled   = scaler.transform(df_input)
     prob     = model.predict_proba(scaled)[0][1]
-    pred     = 1 if prob >= 0.3 else 0
 
     # Result
     st.subheader('Prediction Result')
@@ -204,7 +168,7 @@ if predict_btn:
 
     elif prob >= 0.3:
         st.markdown(
-            f'<div class="warning-box">🔶 EARLY WARNING — MONITOR CLOSELY<br>'
+            f'<div class="warning-box">🔶 EARLY WARNING - MONITOR CLOSELY<br>'
             f'Failure Probability: {prob*100:.1f}%</div>',
             unsafe_allow_html=True)
         st.warning('Schedule maintenance check soon.')
@@ -241,7 +205,7 @@ if predict_btn:
     fig.update_layout(height=320)
     st.plotly_chart(fig, use_container_width=True)
 
-    # Show computed features
+    # Computed features
     with st.expander('View auto-computed engineered features'):
         st.dataframe(pd.DataFrame({
             'Feature': ['Temp_Diff', 'Power', 'Wear_Torque'],
@@ -262,6 +226,5 @@ if predict_btn:
 st.markdown('---')
 st.caption(
     'Model: Gradient Boosting | ROC-AUC: 0.9746 | Recall: 0.8824 | '
-    'Threshold: 0.3 (Early Warning) | '
-    ' Vineeth Muraleedharan'
+    'Vineeth Muraleedharan'
 )
