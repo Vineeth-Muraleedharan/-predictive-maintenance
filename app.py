@@ -47,8 +47,21 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     with open('best_maintenance_model.pkl', 'rb') as f:
-        payload = pickle.load(f)
-    return payload['model'], payload['scaler'], payload['feature_names']
+        model = pickle.load(f)
+    with open('scaler_maintenance.pkl', 'rb') as f:
+        scaler = pickle.load(f)
+    feature_names = [
+        'Type',
+        'Air temperature [K]',
+        'Process temperature [K]',
+        'Rotational speed [rpm]',
+        'Torque [Nm]',
+        'Tool wear [min]',
+        'Temp_Diff',
+        'Power',
+        'Wear_Torque'
+    ]
+    return model, scaler, feature_names
 
 
 model, scaler, feature_names = load_model()
@@ -57,7 +70,7 @@ model, scaler, feature_names = load_model()
 # ── Header ────────────────────────────────────────────────────
 st.markdown('<div class="title">⚙️ Machine Failure Predictor</div>',
             unsafe_allow_html=True)
-st.markdown('<div class="subtitle">IIT Guwahati — Capstone Project | Predictive Maintenance</div>',
+st.markdown('<div class="subtitle">Predictive Maintenance</div>',
             unsafe_allow_html=True)
 st.markdown('---')
 
@@ -199,5 +212,5 @@ if predict_btn:
 st.markdown('---')
 st.caption(
     'Model: Gradient Boosting | ROC-AUC: 0.9746 | Recall: 0.8824 | '
-    'IIT Guwahati Capstone Project — Vineeth Muraleedharan'
+    'Vineeth Muraleedharan'
 )
