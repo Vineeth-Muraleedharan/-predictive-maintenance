@@ -7,6 +7,7 @@ Run with: streamlit run app.py
 import streamlit as st
 import pandas as pd
 import pickle
+import base64
 import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
@@ -18,31 +19,68 @@ st.set_page_config(
     layout='centered'
 )
 
+# ── Background image ──────────────────────────────────────────
+def add_bg_image(image_file):
+    try:
+        with open(image_file, 'rb') as f:
+            encoded = base64.b64encode(f.read()).decode()
+        st.markdown(
+            f"""
+            <style>
+            .stApp {{
+                background-image: url('data:image/png;base64,{encoded}');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                background-repeat: no-repeat;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    except FileNotFoundError:
+        pass  # skip if image not found
+
+add_bg_image('Predictive-Maintenance-AI.png')
+
 # ── CSS ───────────────────────────────────────────────────────
 st.markdown("""
 <style>
     .title {
         font-size: 2rem; font-weight: 700;
-        color: #2C3E50; text-align: center;
+        color: #ffffff; text-align: center;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
     .subtitle {
-        font-size: 0.95rem; color: #7F8C8D;
+        font-size: 0.95rem; color: #e0e0e0;
         text-align: center; margin-bottom: 2rem;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.8);
     }
     .failure-box {
-        background: #FDEDEC; border-left: 5px solid #E74C3C;
+        background: rgba(253,237,236,0.95);
+        border-left: 5px solid #E74C3C;
         border-radius: 8px; padding: 1rem;
         font-size: 1.1rem; font-weight: 600; color: #C0392B;
     }
     .safe-box {
-        background: #EAFAF1; border-left: 5px solid #27AE60;
+        background: rgba(234,250,241,0.95);
+        border-left: 5px solid #27AE60;
         border-radius: 8px; padding: 1rem;
         font-size: 1.1rem; font-weight: 600; color: #1E8449;
     }
     .warning-box {
-        background: #FEF9E7; border-left: 5px solid #F39C12;
+        background: rgba(254,249,231,0.95);
+        border-left: 5px solid #F39C12;
         border-radius: 8px; padding: 1rem;
         font-size: 1.1rem; font-weight: 600; color: #D68910;
+    }
+    section[data-testid="stSidebar"] {
+        background: rgba(13,17,23,0.85);
+    }
+    .block-container {
+        background: rgba(13,17,23,0.75);
+        border-radius: 12px;
+        padding: 2rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -202,7 +240,11 @@ if predict_btn:
             }
         }
     ))
-    fig.update_layout(height=320)
+    fig.update_layout(
+        height=320,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig, use_container_width=True)
 
     # Computed features
