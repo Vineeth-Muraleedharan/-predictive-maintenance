@@ -34,28 +34,55 @@ def add_bg_image(image_file):
                 background-attachment: fixed;
                 background-repeat: no-repeat;
             }}
+            .stApp::before {{
+                content: '';
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.62);
+                z-index: 0;
+            }}
             </style>
             """,
             unsafe_allow_html=True
         )
     except FileNotFoundError:
-        pass  # skip if image not found
+        pass
 
 add_bg_image('Predictive-Maintenance-AI.png')
 
 # ── CSS ───────────────────────────────────────────────────────
 st.markdown("""
 <style>
+    /* Title */
     .title {
-        font-size: 2rem; font-weight: 700;
-        color: #ffffff; text-align: center;
-        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #00BFFF;
+        text-align: center;
+        text-shadow: 0 0 20px rgba(0,191,255,0.6), 0 2px 8px rgba(0,0,0,0.9);
+        letter-spacing: 0.03em;
+        margin-bottom: 0.2rem;
     }
+    /* Subtitle */
     .subtitle {
-        font-size: 0.95rem; color: #e0e0e0;
-        text-align: center; margin-bottom: 2rem;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        font-size: 0.95rem;
+        color: #14B8A6;
+        text-align: center;
+        margin-bottom: 2rem;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+        letter-spacing: 0.04em;
+        font-weight: 500;
     }
+    /* Remove black box border from main content */
+    .block-container {
+        background: rgba(10, 14, 24, 0.70) !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(20, 184, 166, 0.25) !important;
+        padding: 2rem !important;
+        backdrop-filter: blur(6px);
+    }
+    /* Result boxes */
     .failure-box {
         background: rgba(253,237,236,0.95);
         border-left: 5px solid #E74C3C;
@@ -74,14 +101,10 @@ st.markdown("""
         border-radius: 8px; padding: 1rem;
         font-size: 1.1rem; font-weight: 600; color: #D68910;
     }
-    section[data-testid="stSidebar"] {
-        background: rgba(13,17,23,0.85);
-    }
-    .block-container {
-        background: rgba(13,17,23,0.75);
-        border-radius: 12px;
-        padding: 2rem !important;
-    }
+    /* Slider accent */
+    .stSlider [data-baseweb="slider"] {{
+        accent-color: #14B8A6;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -135,13 +158,13 @@ with c1:
         'H - Heavy Duty':  2
     }[machine_type]
 
-    air_temp = st.number_input(
+    air_temp = st.slider(
         'Air Temperature (K)',
         min_value=295.0, max_value=305.0,
         value=298.0, step=0.1
     )
 
-    proc_temp = st.number_input(
+    proc_temp = st.slider(
         'Process Temperature (K)',
         min_value=305.0, max_value=315.0,
         value=308.0, step=0.1
@@ -172,7 +195,6 @@ predict_btn = st.button('🔍 Predict Failure Risk', use_container_width=True)
 
 # ── Prediction ────────────────────────────────────────────────
 if predict_btn:
-    # Compute engineered features
     temp_diff   = proc_temp - air_temp
     power       = torque * rot_speed
     wear_torque = tool_wear * torque
@@ -189,12 +211,10 @@ if predict_btn:
         'Wear_Torque':             wear_torque
     }
 
-    # Predict — 0.3 threshold for early warning
     df_input = pd.DataFrame([input_dict])[feature_names]
     scaled   = scaler.transform(df_input)
     prob     = model.predict_proba(scaled)[0][1]
 
-    # Result
     st.subheader('Prediction Result')
 
     if prob >= 0.5:
@@ -206,7 +226,7 @@ if predict_btn:
 
     elif prob >= 0.3:
         st.markdown(
-            f'<div class="warning-box">🔶 EARLY WARNING - MONITOR CLOSELY<br>'
+            f'<div class="warning-box">🔶 EARLY WARNING — MONITOR CLOSELY<br>'
             f'Failure Probability: {prob*100:.1f}%</div>',
             unsafe_allow_html=True)
         st.warning('Schedule maintenance check soon.')
@@ -218,20 +238,20 @@ if predict_btn:
             unsafe_allow_html=True)
         st.success('No immediate action required.')
 
-    # Gauge chart
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=round(prob * 100, 1),
-        title={'text': 'Failure Probability (%)'},
+        title={'text': 'Failure Probability (%)', 'font': {'color': '#e6edf3'}},
+        number={'font': {'color': '#e6edf3'}},
         gauge={
-            'axis': {'range': [0, 100]},
+            'axis': {'range': [0, 100], 'tickcolor': '#e6edf3'},
             'bar':  {'color': '#E74C3C' if prob >= 0.5
                               else '#F39C12' if prob >= 0.3
                               else '#27AE60'},
             'steps': [
-                {'range': [0,  30],  'color': '#EAFAF1'},
-                {'range': [30, 50],  'color': '#FEF9E7'},
-                {'range': [50, 100], 'color': '#FDEDEC'}
+                {'range': [0,  30],  'color': 'rgba(39,174,96,0.15)'},
+                {'range': [30, 50],  'color': 'rgba(243,156,18,0.15)'},
+                {'range': [50, 100], 'color': 'rgba(231,76,60,0.15)'}
             ],
             'threshold': {
                 'line':      {'color': 'red', 'width': 4},
@@ -243,11 +263,11 @@ if predict_btn:
     fig.update_layout(
         height=320,
         paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        plot_bgcolor='rgba(0,0,0,0)',
+        font={'color': '#e6edf3'}
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Computed features
     with st.expander('View auto-computed engineered features'):
         st.dataframe(pd.DataFrame({
             'Feature': ['Temp_Diff', 'Power', 'Wear_Torque'],
