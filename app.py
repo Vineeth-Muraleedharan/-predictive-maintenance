@@ -1,5 +1,5 @@
 """
-Predictive Maintenance - Failure Prediction App
+app.py - Predictive Maintenance - Failure Prediction App
 
 Run with: streamlit run app.py
 """
@@ -47,21 +47,8 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     with open('best_maintenance_model.pkl', 'rb') as f:
-        model = pickle.load(f)
-    with open('scaler_maintenance.pkl', 'rb') as f:
-        scaler = pickle.load(f)
-    feature_names = [
-        'Type',
-        'Air temperature [K]',
-        'Process temperature [K]',
-        'Rotational speed [rpm]',
-        'Torque [Nm]',
-        'Tool wear [min]',
-        'Temp_Diff',
-        'Power',
-        'Wear_Torque'
-    ]
-    return model, scaler, feature_names
+        payload = pickle.load(f)
+    return payload['model'], payload['scaler'], payload['feature_names']
 
 
 model, scaler, feature_names = load_model()
@@ -70,7 +57,7 @@ model, scaler, feature_names = load_model()
 # ── Header ────────────────────────────────────────────────────
 st.markdown('<div class="title">⚙️ Machine Failure Predictor</div>',
             unsafe_allow_html=True)
-st.markdown('<div class="subtitle"> Predictive Maintenance</div>',
+st.markdown('<div class="subtitle">IIT Guwahati — Capstone Project | Predictive Maintenance</div>',
             unsafe_allow_html=True)
 st.markdown('---')
 
@@ -86,40 +73,40 @@ with c1:
         ['L — Light Duty', 'M — Medium Duty', 'H — Heavy Duty']
     )
     type_val = {
-        'L — Light Duty': 0,
+        'L — Light Duty':  0,
         'M — Medium Duty': 1,
-        'H — Heavy Duty': 2
+        'H — Heavy Duty':  2
     }[machine_type]
 
     air_temp = st.number_input(
         'Air Temperature (K)',
         min_value=295.0, max_value=305.0,
-        value=300.0, step=0.1
+        value=298.0, step=0.1
     )
 
     proc_temp = st.number_input(
         'Process Temperature (K)',
         min_value=305.0, max_value=315.0,
-        value=310.0, step=0.1
+        value=308.0, step=0.1
     )
 
 with c2:
     rot_speed = st.number_input(
         'Rotational Speed (rpm)',
         min_value=1168, max_value=2886,
-        value=1500, step=10
+        value=1550, step=10
     )
 
     torque = st.number_input(
         'Torque (Nm)',
         min_value=3.8, max_value=76.6,
-        value=40.0, step=0.1
+        value=45.0, step=0.1
     )
 
     tool_wear = st.number_input(
         'Tool Wear (min)',
         min_value=0, max_value=253,
-        value=100, step=1
+        value=150, step=1
     )
 
 st.markdown('---')
@@ -183,9 +170,9 @@ if predict_btn:
                 {'range': [60, 100], 'color': '#FDEDEC'}
             ],
             'threshold': {
-                'line': {'color': 'red', 'width': 4},
+                'line':      {'color': 'red', 'width': 4},
                 'thickness': 0.75,
-                'value': 50
+                'value':     50
             }
         }
     ))
@@ -196,15 +183,21 @@ if predict_btn:
     with st.expander('View auto-computed engineered features'):
         st.dataframe(pd.DataFrame({
             'Feature': ['Temp_Diff', 'Power', 'Wear_Torque'],
-            'Value':   [f'{temp_diff:.2f} K',
-                        f'{power:,.0f}',
-                        f'{wear_torque:.1f}'],
-            'Meaning': ['Thermal stress',
-                        'Mechanical power (proxy)',
-                        'Load-weighted wear']
+            'Value':   [
+                f'{temp_diff:.2f} K',
+                f'{power:,.0f}',
+                f'{wear_torque:.1f}'
+            ],
+            'Meaning': [
+                'Thermal stress indicator',
+                'Mechanical power (proxy)',
+                'Load-weighted wear'
+            ]
         }), hide_index=True, use_container_width=True)
 
 # ── Footer ────────────────────────────────────────────────────
 st.markdown('---')
-st.caption('Model: Gradient Boosting | ROC-AUC: 0.9746 | Recall: 0.8824 | '
-           'Vineeth Muraleedharan')
+st.caption(
+    'Model: Gradient Boosting | ROC-AUC: 0.9746 | Recall: 0.8824 | '
+    'IIT Guwahati Capstone Project — Vineeth Muraleedharan'
+)
